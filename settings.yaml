@@ -1,0 +1,125 @@
+version: "1.0"
+
+root: .
+encoding: utf-8
+
+models:
+  llm:
+    type: openai_chat
+    model: gpt-4o-mini
+    api_key: ${OPENAI_API_KEY}
+    config:
+      temperature: 0
+      max_tokens: 4096
+
+  embedding:
+    type: openai_embedding
+    model: text-embedding-3-small
+    api_key: ${OPENAI_API_KEY}
+
+  default_chat_model:
+    type: openai_chat
+    model: gpt-4o-mini
+    api_key: ${OPENAI_API_KEY}
+
+  default_embedding_model:
+    type: openai_embedding
+    model: text-embedding-3-small
+    api_key: ${OPENAI_API_KEY}
+
+processing:
+  text_splitter:
+    chunk_size: 1800
+    chunk_overlap: 200
+    separators: ["\n\n", "\n", ".", " "]
+
+  cleanup:
+    remove_numeric_tables: true
+    remove_headers: true
+    remove_footers: true
+    strip_whitespace: true
+
+graph_extraction:
+  entity_types:
+    - 기관
+    - 부서
+    - 사업
+    - 회계항목
+    - 계약
+    - 공사명
+    - 규정
+    - 법령
+    - 지적사항
+    - 문제점
+    - 원인
+    - 영향
+    - 조치사항
+    - 비고
+
+  relationship_types:
+    - 관련됨
+    - 위반
+    - 원인
+    - 영향
+    - 개선필요
+    - 책임주체
+    - 법령근거
+    - 부적정집행
+    - 조치요구
+
+  min_entity_length: 2
+  min_relationship_confidence: 0.35
+
+community_detection:
+  cluster_size: 8
+  cluster_algorithm: louvain
+  min_community_size: 3
+
+summaries:
+  enforce_structure: true
+  structure:
+    - 사실관계 요약
+    - 문제점
+    - 원인
+    - 영향
+    - 관련 기관/부서
+    - 개선 필요사항
+    - 조치 사항
+
+search:
+  enable_claim_boosting: true
+  claim_weight: 2.0
+  entity_weight: 1.5
+  keyword_boosting: true
+  keywords:
+    - 부적정
+    - 미흡
+    - 문제점
+    - 원인
+    - 영향
+    - 위법
+    - 부당
+    - 설계변경
+    - 계약
+    - 예산
+
+reports:
+  include_entity_graph: true
+  include_summary: true
+  include_claims: true
+
+output:
+  type: file
+  base_dir: output
+
+update_index_output:
+  type: file
+  base_dir: update_output
+
+cache:
+  type: file
+  base_dir: cache
+
+reporting:
+  type: file
+  base_dir: logs
